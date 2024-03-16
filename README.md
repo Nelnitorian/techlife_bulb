@@ -198,3 +198,4 @@ The following links were used to either learn from them or plainly use their cod
   - https://github.com/thorin8k/techlife_bulb
 - Documentation:
   - https://developers.home-assistant.io/docs/core/entity/light/
+  - https://developers.home-assistant.io/docs/core/entity/

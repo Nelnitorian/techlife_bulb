@@ -80,7 +80,7 @@ class TechlifeControl(LightEntity):
 
     @property
     def unique_id(self):
-        return self.mac + "-" + "techlife_light"
+        return "techlife_bulb_control" + "." + self.mac
 
     @property
     def name(self):
