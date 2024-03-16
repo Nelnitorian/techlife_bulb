@@ -3,10 +3,10 @@ This light integration controls your techlife bulbs without flashing or modifyin
 
 ## About this repository
 
-The steps explained in this file are the ones I took to solve the problem of integrating my TechLife bulbs with Home Assistant. My Home Assistant instance is being run in a docker container.
+The steps explained in this file are the ones I took to solve the problem of integrating my TechLife bulbs with Home Assistant. Some of my decision were influenced by my Home Assistant instance being run in a docker container.
 
 ## Features:
-Ability to:
+The script has the ability to:
 - Turn on / off
 - Change brigthness
 - Change rgb color
@@ -28,7 +28,7 @@ Don't forget to check the Credits and Info section at the end of this file.
 
 For this there are two options. Either use a script that others have created or configure it using the app. I believe I used the script once and it worked fine.
 
-The script is `techlife_setup.py` and you can find it in the root of this repository. Check the `Connecting to wifi - Custom Script` section for more info.
+The script is `techlife_setup.py` and you can find it in the root of this repository. Check the [Connecting to wifi - Custom Script](#Connecting-to-wifi---Custom-Script) section for more info.
 
 The other option is to use the mobile app `TechLife Pro`. For this you will have to create an account and follow the steps listed there to connect the bulb to your wifi.
 
@@ -109,21 +109,85 @@ Note that the entity can't be configured via the UI, only via the configuration.
 ## Connecting to wifi - Custom Script
 
 If the bulb is already connected to your wifi yoy can skip this step.
-- Download 'techlife_setup.py'
+- Download `techlife_setup.py`
 - Ensure python installed in your system.
 - Modify ssid, password and bssid inside the script.
 - Connect the bulb (Reset if needed turning on / off 6 times)
 - Connect your computer to the wifi made by the bulb
 - Run `> python techlife_setup.py`
 
+## Lightbulb MQTT message format
+
+As far as I have researched there are two types of lightbulbs. The ones with only brightness and the ones with brightness and color. The message format is different for each type.
+
+The command used for both brightness only and RGB lightbulbs is 0x28. The closing tag command is 0x29.
+
+Message format for a brightness only lightbulb. Example with brightness 150 (out of 255):
+
+byte | value | example
+--- | --- | ---
+0 | Command | 0x28
+1 | 0x00 | 0x00
+2 | 0x00 | 0x00
+3 | 0x00 | 0x00
+4 | 0x00 | 0x00
+5 | 0x00 | 0x00
+6 | 0x00 | 0x00
+7 | Second byte of brightness value (little endian) | 0xFA
+8 | First byte of brightness value | 0x16
+9 | 0x00 | 0x00
+10 | 0x00 | 0x00
+11 | 0x00 | 0x00
+12 | 0x00 | 0x00
+13 | 0xF0 | 0xF0
+14 | Checksum | 0x66
+15 | Closing tag | 0x29
+
+Brightness value is a number between 0 and 10000. In this example: brightness = 150 -> 10000 * 150 // 255 = 5882 -> 0x16FA. Bit 7: 0xFA, bit 8: 0x16. 
+
+Message format for a RGB lightbulb. Example with RGB color (130, 255, 180) and brightness 150 (out of 255):
+ 
+byte | value | example
+--- | --- | ---
+0 | Command | 0x28
+1 | Second byte of RED value (little endian)	| 0xB6
+2 | First byte of RED value | 0x0B
+3 | Second byte of GREEN value (little endian) | 0xFA
+4 | First byte of GREEN value | 0x16
+5 | Second byte of BLUE value (little endian) | 0x38
+6 | First byte of BLUE value | 0x10
+7 | 0x00 | 0x00
+8 | 0x00 | 0x00
+9 | 0x00 | 0x00
+10 | 0x00 | 0x00
+11 | 0x00 | 0x00
+12 | 0x00 | 0x00
+13 | 0x0F | 0x0F
+14 | Checksum | 0x76
+15 | Closing tag for Command 0x28 is 0x29 | 0x29
+
+Each color value is a number between 0 and 10000. In this example: brightness = 150. 
+
+color | value [0, 255] | brightness [0, 1] * value [0, 10000] | value in hex
+--- | --- | --- | ---
+Red | 130 | 150 / 255 * 10000 * 130 // 255 = 2998 | 0x0BB6 | 
+Green | 255	| 150 / 255 * 10000 * 255 // 255 = 5882 | 0x16FA |  
+Blue | 180 | 150 / 255 * 10000 * 180 // 255 = 4152 | 0x1038 | 
+
+
+Note that 13th byte is different in both cases. For brightness only bulbs it is 0xF0 and for RGB bulbs it is 0x0F. In an RGB bulb the brightness information is coded within the RGB values. Quoting [Home Assistant's documentation](https://developers.home-assistant.io/docs/core/entity/light/):
+
+>Note that in color modes `ColorMode.RGB`, `ColorMode.RGBW` and `ColorMode.RGBWW` there is `brightness` information both in the light's brightness property and in the color. As an example, if the light's brightness is 128 and the light's color is (192, 64, 32), the overall brightness of the light is: 128/255 * max(192, 64, 32)/255 = 38%.
+
+
 ## Known issues
-- The `TechLife Pro` will stop being able to reach the lightbulb once the traffic redirection is in place.
-- At the time being there is no check for whether the lightbulb is online or not. HA will operate as if the lightbulb were always online.
+- The `TechLife Pro` app will stop being able to reach the lightbulb once the traffic redirection is in place.
+- At the time being there is no check for whether the lightbulb is online or not. HA will operate as if the lightbulb were always online, even if it is not.
 
 
 ## Credits and Info
 
-The following links were used to either get information or plainly use their code. All credit is for them.
+The following links were used to either learn from them or plainly use their code. Please, all credit is for them.
 
 - Original posts:
   - https://community.openhab.org/t/hacking-techlife-pro-bulbs/85940

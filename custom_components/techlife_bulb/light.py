@@ -11,7 +11,6 @@ import homeassistant.helpers.config_validation as cv
 # Import the device class from the component that you want to support
 from homeassistant.components.light import (
     ColorMode,
-    SUPPORT_COLOR,
     ATTR_BRIGHTNESS,
     ATTR_RGB_COLOR,
     PLATFORM_SCHEMA,
@@ -121,16 +120,14 @@ class TechlifeControl(LightEntity):
 
         if ATTR_BRIGHTNESS in kwargs:
             self._brightness = kwargs[ATTR_BRIGHTNESS]
-            self._update_brightness()
 
         if ATTR_RGB_COLOR in kwargs:
             self._rgb = kwargs[ATTR_RGB_COLOR]
 
-            self._update_rgb()
+        self._update_leds()
 
     def turn_off(self, **kwargs):
         """Instruct the light to turn off."""
-        _LOGGER.error(f"Lights going off")
         self.off()
         self._state = False
 
@@ -139,18 +136,11 @@ class TechlifeControl(LightEntity):
         sub_topic = "dev_sub_%s" % self.mac
         self.client.publish(sub_topic, command)
 
-    def _update_rgb(self):
-        red, green, blue = map(lambda x: int(x * 10000 // 255), self._rgb)
-
+    def _update_leds(self):
+        red, green, blue = map(
+            lambda x: int(x * 10000 * self._brightness / 255 // 255), self._rgb
+        )
         payload = self.msg.pack(0x28, red, green, blue, 0, 0, 0, 0x0F, 0, 0x29)
-        self.send(payload)
-
-    def _update_brightness(self):
-        value = self._brightness * 10000 // 255
-        assert 0 <= value <= 10000
-        payload = bytearray.fromhex("28 00 00 00 00 00 00 00 00 00 00 00 00 f0 00 29")
-        payload[7] = value & 0xFF
-        payload[8] = value >> 8
         self.send(payload)
 
     def on(self):
