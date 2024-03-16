@@ -143,7 +143,7 @@ byte | value | example
 14 | Checksum | 0x66
 15 | Closing tag | 0x29
 
-Brightness value is a number between 0 and 10000. In this example: brightness = 150 -> 10000 * 150 // 255 = 5882 -> 0x16FA. Bit 7: 0xFA, bit 8: 0x16. 
+Brightness value is a number between 0 and 10000. In this example: brightness = 150 -> 10000 * 150 // 255 = 5882 -> 0x16FA. Byte  7: 0xFA, byte 8: 0x16. 
 
 Message format for a RGB lightbulb. Example with RGB color (130, 255, 180) and brightness 150 (out of 255):
  
@@ -182,7 +182,7 @@ Note that 13th byte is different in both cases. For brightness only bulbs it is 
 
 ## Known issues
 - The `TechLife Pro` app will stop being able to reach the lightbulb once the traffic redirection is in place.
-- At the time being there is no check for whether the lightbulb is online or not. HA will operate as if the lightbulb were always online, even if it is not.
+- At the time being there is no check for whether the lightbulb is online or not. HA will operate as if the lightbulb were always online, even if it is not. This will lead to a mismatch between the state of the lightbulb and the state of the entity in HA.
 
 
 ## Credits and Info
