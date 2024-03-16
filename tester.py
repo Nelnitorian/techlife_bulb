@@ -14,7 +14,7 @@ class TechlifeControl:
     def send(self, cmd):
         command = self.calc_checksum(cmd)
         sub_topic = "dev_sub_%s" % self.mac
-        self.client.publish(sub_topic, command)
+        self.client.publish(sub_topic, bytes(command))
 
     def dim(self, value):
         v = int(100 * value)
@@ -41,7 +41,7 @@ class TechlifeControl:
         return payload
 
 
-client = mqtt.Client()
+client = mqtt.Client(2)
 client.username_pw_set("username", "password")
 
 client.connect("broker_ip", 1883, 60)
