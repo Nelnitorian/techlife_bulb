@@ -79,6 +79,10 @@ class TechlifeControl(LightEntity):
         self._rgb = [255, 255, 255]
 
     @property
+    def unique_id(self):
+        return self.mac + "-" + "techlife_light"
+
+    @property
     def name(self):
         """Return the display name of this light."""
         return self._name
