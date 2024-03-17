@@ -82,6 +82,10 @@ class TechlifeControl(LightEntity):
 
     @property
     def unique_id(self):
+        """Return the unique_id of the entity.
+        This method is optional. Removing it indicates forbids
+        reconfiguration in the frontend.
+        """
         return homeassistant.helpers.device_registry.format_mac(self.mac)
 
     @property
@@ -91,15 +95,12 @@ class TechlifeControl(LightEntity):
 
     @property
     def brightness(self):
-        """Return the brightness of the light.
-        This method is optional. Removing it indicates to Home Assistant
-        that brightness is not supported for this light.
-        """
+        """Return the brightness of the light."""
         return self._brightness
 
     @property
     def rgb_color(self):
-        """Return the rgbw color of the light."""
+        """Return the rgb color of the light."""
         return self._rgb
 
     @property
@@ -109,16 +110,18 @@ class TechlifeControl(LightEntity):
 
     @property
     def supported_color_modes(self):
+        """Return the list of possible color modes."""
         return [ColorMode.RGB]
 
     @property
     def color_mode(self):
+        """Return the current color mode functionality."""
         return ColorMode.RGB
 
     def turn_on(self, **kwargs):
         """Instruct the light to turn on.
-        You can skip the brightness part if your light does not support
-        brightness control.
+        This function is called whenever the bulb is instructed to
+        change color or brightness.
         """
         if not self._state:
             self.on()

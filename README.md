@@ -124,7 +124,8 @@ As far as I have researched there are two types of lightbulbs. The ones with onl
 
 The command used for both brightness only and RGB lightbulbs is 0x28. The closing tag command is 0x29.
 
-Message format for a brightness only lightbulb. Example with brightness 150 (out of 255):
+### Message format to set brightness. 
+Example with brightness 150 (out of 255):
 
 byte | value | example
 --- | --- | ---
@@ -147,7 +148,8 @@ byte | value | example
 
 Brightness value is a number between 0 and 10000. In this example: brightness = 150 -> 10000 * 150 // 255 = 5882 -> 0x16FA. Byte  7: 0xFA, byte 8: 0x16. 
 
-Message format for a RGB lightbulb. Example with RGB color (130, 255, 180) and brightness 150 (out of 255):
+### Message format to set RGB (and brightness). 
+Example with RGB color (130, 255, 180) and brightness 150 (out of 255):
 
 Each color value is a number between 0 and 10000. In this example: brightness = 150. 
 
@@ -181,8 +183,19 @@ byte | value | example
 14 | Checksum | 0x76
 15 | Closing tag for Command 0x28 is 0x29 | 0x29
 
-Note that 13th byte is different in both cases. In the brightness only message it is 0xF0 and for the RGB message it is 0x0F. 
+Note that 13th byte is different in both cases. In the brightness only message it is 0xF0 and for the RGB message it is 0x0F.
 
+## Message format to turn ON
+
+byte | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
+--- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---
+value | 0xFA | 0x23 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x23 | 0xFB
+
+## Message format to turn OFF
+
+byte | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
+--- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---
+value | 0xFA | 0x24 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x00 | 0x24 | 0xFB
 
 ## Known issues
 - The `TechLife Pro` app will stop being able to reach the lightbulb once the traffic redirection is in place.
