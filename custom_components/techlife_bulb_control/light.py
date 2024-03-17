@@ -8,6 +8,8 @@ import voluptuous as vol
 
 import homeassistant.helpers.config_validation as cv
 
+import homeassistant.helpers.device_registry
+
 # Import the device class from the component that you want to support
 from homeassistant.components.light import (
     ColorMode,
@@ -80,7 +82,7 @@ class TechlifeControl(LightEntity):
 
     @property
     def unique_id(self):
-        return "techlife_bulb_control" + "." + self.mac
+        return homeassistant.helpers.device_registry.format_mac(self.mac)
 
     @property
     def name(self):

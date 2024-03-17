@@ -104,11 +104,13 @@ Note: the entity_id is given by the name.
 
 Once you have restarted, the custom_component will be available in your system (check home_assistant.log) and an entity named 'light.yourbulb' will be available.
 
-Note that the entity can't be configured via the UI, only via the configuration.yaml file.
+Home Assistant uses two ids to identify each entity. The entity_id and the unique_id. The entity_id is the used to call the entity in the frontend. The unique_id is the one that is used to identify the entity within the system. 
+
+An entity without a unique_id won't be able to be reconfigured in the frontend. The script assigns a unique_id to the entity with the format `<mac_address>` as the [documentation](https://developers.home-assistant.io/docs/entity_registry_index/#unique-id) suggests.
 
 ## Connecting to wifi - Custom Script
 
-If the bulb is already connected to your wifi yoy can skip this step.
+If the bulb is already connected to your wifi you can skip this step.
 - Download `techlife_setup.py`
 - Ensure python installed in your system.
 - Modify ssid, password and bssid inside the script.
@@ -146,7 +148,20 @@ byte | value | example
 Brightness value is a number between 0 and 10000. In this example: brightness = 150 -> 10000 * 150 // 255 = 5882 -> 0x16FA. Byte  7: 0xFA, byte 8: 0x16. 
 
 Message format for a RGB lightbulb. Example with RGB color (130, 255, 180) and brightness 150 (out of 255):
- 
+
+Each color value is a number between 0 and 10000. In this example: brightness = 150. 
+
+color | value [0, 255] | brightness [0, 1] * value [0, 10000] | value in hex
+--- | --- | --- | ---
+Red | 130 | 150 / 255 * 10000 * 130 // 255 = 2998 | 0x0BB6 | 
+Green | 255	| 150 / 255 * 10000 * 255 // 255 = 5882 | 0x16FA |  
+Blue | 180 | 150 / 255 * 10000 * 180 // 255 = 4152 | 0x1038 | 
+
+
+In an RGB bulb the brightness information is coded within the RGB values. Quoting [Home Assistant's documentation](https://developers.home-assistant.io/docs/core/entity/light/):
+
+>Note that in color modes `ColorMode.RGB`, `ColorMode.RGBW` and `ColorMode.RGBWW` there is `brightness` information both in the light's brightness property and in the color. As an example, if the light's brightness is 128 and the light's color is (192, 64, 32), the overall brightness of the light is: 128/255 * max(192, 64, 32)/255 = 38%.
+
 byte | value | example
 --- | --- | ---
 0 | Command | 0x28
@@ -166,18 +181,7 @@ byte | value | example
 14 | Checksum | 0x76
 15 | Closing tag for Command 0x28 is 0x29 | 0x29
 
-Each color value is a number between 0 and 10000. In this example: brightness = 150. 
-
-color | value [0, 255] | brightness [0, 1] * value [0, 10000] | value in hex
---- | --- | --- | ---
-Red | 130 | 150 / 255 * 10000 * 130 // 255 = 2998 | 0x0BB6 | 
-Green | 255	| 150 / 255 * 10000 * 255 // 255 = 5882 | 0x16FA |  
-Blue | 180 | 150 / 255 * 10000 * 180 // 255 = 4152 | 0x1038 | 
-
-
-Note that 13th byte is different in both cases. For brightness only bulbs it is 0xF0 and for RGB bulbs it is 0x0F. In an RGB bulb the brightness information is coded within the RGB values. Quoting [Home Assistant's documentation](https://developers.home-assistant.io/docs/core/entity/light/):
-
->Note that in color modes `ColorMode.RGB`, `ColorMode.RGBW` and `ColorMode.RGBWW` there is `brightness` information both in the light's brightness property and in the color. As an example, if the light's brightness is 128 and the light's color is (192, 64, 32), the overall brightness of the light is: 128/255 * max(192, 64, 32)/255 = 38%.
+Note that 13th byte is different in both cases. In the brightness only message it is 0xF0 and for the RGB message it is 0x0F. 
 
 
 ## Known issues
